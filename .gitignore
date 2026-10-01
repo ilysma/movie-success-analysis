@@ -1,0 +1,29 @@
+# Данные (файл ~789 МБ, GitHub не принимает файлы больше 100 МБ)
+data/
+
+# Виртуальное окружение
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Секреты: токены Kaggle, пароли к базе
+.env
+kaggle.json
+
+# Редакторы и система
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Временные файлы Excel
+~$*
+
+# Личные рабочие заметки (не для публикации)
+/PROJECT_CONTEXT.md

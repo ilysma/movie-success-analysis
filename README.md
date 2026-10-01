@@ -1,0 +1,78 @@
+# Что делает фильм успешным
+
+> Черновик. Разделы с пометкой TODO заполняются по ходу проекта.
+
+## Бизнес-вопрос
+
+Проект помогает продюсерам решить, какой фильм запускать в продакшн следующим. Для этого я проверяю, как жанр, бюджет, длительность, месяц выхода и возрастной рейтинг связаны с окупаемостью и рейтингом фильмов.
+
+## Данные
+
+- **Источник:** Kaggle, [The Ultimate 1Million Movies Dataset (TMDB + IMDb)](https://www.kaggle.com/datasets/alanvourch/tmdb-movies-daily-updates)
+- **Файл:** `TMDB_all_movies.csv` (~789 МБ, более 960 000 фильмов)
+- **Версия датасета: 1015.** Датасет обновляется ежедневно, поэтому для воспроизводимости результатов указана конкретная версия. Более новая версия на момент скачивания (сентябрь 2026) была недоступна.
+- **Дата скачивания:** 30.09.2026
+
+Скачать нужную версию:
+
+```
+python -c "import kagglehub; print(kagglehub.dataset_download('alanvourch/tmdb-movies-daily-updates/versions/1015'))"
+
+```
+
+Сам файл в репозиторий не входит (папка `data/` в `.gitignore`).
+
+### Колонки
+
+`id`, `title`, `vote_average`, `vote_count`, `status`, `release_date`, `revenue`, `runtime`, `budget`, `imdb_id`, `original_language`, `original_title`, `overview`, `popularity`, `tagline`, `genres`, `production_companies`, `production_countries`, `spoken_languages`, `cast`, `director`, `director_of_photography`, `writers`, `producers`, `music_composer`, `imdb_rating`, `imdb_votes`, `poster_path`, `keywords`, `certification_us`
+
+### Особенности данных
+
+
+- У большинства фильмов `budget` и `revenue` равны 0. Это пропуски, а не реальные нули (уточнить на полном датасете).
+- Для анализа окупаемости берутся фильмы с `budget > 0` и `revenue > 0`, достаточным числом голосов и релизами примерно 2000-2025 (пороги уточняются после EDA).
+- Фильмы 2025-2026 могли не завершить прокат, их сборы неполные.
+- Окупаемость считается как `revenue / budget`.
+- `runtime = 0` означает «не указано», такие строки исключаются.
+- Для гипотезы 2 из `certification_us` исключаются `NR` и пропуски.
+- Первые 5000 строк файла идут по возрастанию `id` и состоят из ранних записей TMDB (медианный год релиза 1996). Доли нулей и пропусков, посчитанные на них, нельзя переносить на весь датасет. Итоговые доли считаются на полных данных в PostgreSQL.
+
+### Возрастные рейтинги (`certification_us`)
+
+
+| Значение | Расшифровка | Что значит |
+|----------|-------------|------------|
+| `G` | General Audiences | Для всех возрастов |
+| `PG` | Parental Guidance Suggested | Детям лучше смотреть с родителями |
+| `PG-13` | Parents Strongly Cautioned | Детям до 13 лет может не подойти |
+| `R` | Restricted | До 17 лет только со взрослым |
+| `NC-17` | No One 17 and Under Admitted | До 17 лет вход запрещён |
+| `NR` | Not Rated | Рейтинг не присвоен (это отсутствие данных) |
+
+
+## Гипотезы
+
+
+| № | Гипотеза | Метрика | Колонки |
+|---|----------|---------|---------|
+| 1 | Фильмы длиннее 120 минут имеют более высокий средний рейтинг, чем короткие. | средний imdb_rating | runtime, imdb_rating |
+| 2 | Фильмы PG-13 окупаются лучше, чем R | revenue / budget (медиана) | revenue, certification_us, budget|
+| 3 | Фильмы с бюджетом выше медианы окупаются лучше, чем с бюджетом ниже медианы. | revenue / budget (медиана) | budget, revenue |
+| 4 | Фильмы с жанром Action окупаются лучше, чем Horror. Буду сравнивать фильмы, у которых в genres есть только один из двух жанров.| revenue / budget (медиана) | genres, revenue, budget |
+| 5 | Фильмы, вышедшие в летние месяцы (июнь-август), окупаются лучше, чем вышедшие в январе | revenue / budget (медиана) | release_date, revenue, budget |
+
+## Стек
+
+Python, pandas, numpy, matplotlib, seaborn, Jupyter, PostgreSQL, SQLAlchemy, DBeaver, Power BI
+
+## План
+
+1. Задача и гипотезы
+2. Загрузка данных в PostgreSQL (частями, с нормализацией)
+3. Очистка и подготовка
+4. Анализ: SQL + pandas, EDA
+5. Дашборд в Power BI
+6. Выводы
+
+## Результаты
+
