@@ -67,8 +67,8 @@ Python, pandas, numpy, matplotlib, seaborn, Jupyter, PostgreSQL, SQLAlchemy, DBe
 
 ## План
 
-1. Задача и гипотезы
-2. Загрузка данных в PostgreSQL (частями, с нормализацией)
+1. Задача и гипотезы +
+2. Загрузка данных в PostgreSQL (частями, с нормализацией) +
 3. Очистка и подготовка
 4. Анализ: SQL + pandas, EDA
 5. Дашборд в Power BI
