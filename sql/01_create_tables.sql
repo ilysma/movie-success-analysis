@@ -1,4 +1,7 @@
-CREATE TABLE movies (
+-- создаю таблицы
+
+-- Основная таблица: один фильм = одна строка. Колонки из списков 1 и 2
+CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY,
     title TEXT,
     status TEXT,
@@ -17,15 +20,15 @@ CREATE TABLE movies (
     imdb_id TEXT
 );
 
-CREATE TABLE genres (
+-- Справочник жанров: каждый жанр записан один раз
+CREATE TABLE IF NOT EXISTS genres (
     genre_id SERIAL PRIMARY KEY,
     genre_name TEXT UNIQUE
 );
 
-CREATE TABLE movie_genres (
+-- Связь многие-ко-многим: какому фильму какие жанры соответствуют
+CREATE TABLE IF NOT EXISTS movie_genres (
     movie_id INTEGER REFERENCES movies(id),
     genre_id INTEGER REFERENCES genres(genre_id),
     PRIMARY KEY (movie_id, genre_id)
 );
-
-SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
