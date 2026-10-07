@@ -77,3 +77,17 @@ SELECT
                      AND imdb_votes >= 1000) AS by_votes
 FROM movies
 WHERE status = 'Released' AND budget > 0 AND revenue > 0;
+
+-- Выбор диапазона лет для v_rating_movies (гипотеза 1): сколько фильмов при разных границах
+-- результат: y2000_2024 - 34 076, y1990_2024 - 39 087,  y2000_2026 - 36 153, all_years - 53 377
+
+SELECT
+    count(*) FILTER (WHERE EXTRACT(YEAR FROM release_date) BETWEEN 2000 AND 2024) AS y2000_2024,
+    count(*) FILTER (WHERE EXTRACT(YEAR FROM release_date) BETWEEN 1990 AND 2024) AS y1990_2024,
+    count(*) FILTER (WHERE EXTRACT(YEAR FROM release_date) BETWEEN 2000 AND 2026) AS y2000_2026,
+    count(*) AS all_years
+FROM movies
+WHERE status = 'Released'
+  AND runtime >= 60
+  AND imdb_rating IS NOT NULL
+  AND imdb_votes >= 1000;
