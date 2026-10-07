@@ -22,3 +22,23 @@ WHERE status = 'Released' -- только вышедшие, без анонсо�
 
 -- ожидаемо: 7 004
 SELECT count(*) FROM v_roi_movies;
+
+-- Фильмы для гипотезы 1 (длительность и рейтинг): 2000-2024, без бюджета и сборов
+CREATE OR REPLACE VIEW v_rating_movies AS
+SELECT 
+	id, 
+	title, 
+	release_date, 
+	runtime, 
+	imdb_rating, 
+	imdb_votes
+FROM movies
+WHERE status = 'Released' -- только вышедшие
+	AND release_date BETWEEN '2000-01-01' AND '2024-12-31' -- та же эпоха, что в v_roi_movies
+	AND runtime >= 60 -- длительностью более часа, осекаею короткометражки
+	AND imdb_rating IS NOT NULL -- без рейтинга фильм для гипотезы 1 бесполезен
+	AND imdb_votes >= 1000; -- рейтинг по малому числу голосов ненадёжен
+
+SELECT count(*) FROM v_rating_movies
+
+	
