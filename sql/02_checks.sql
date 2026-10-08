@@ -79,7 +79,7 @@ FROM movies
 WHERE status = 'Released' AND budget > 0 AND revenue > 0;
 
 -- Выбор диапазона лет для v_rating_movies (гипотеза 1): сколько фильмов при разных границах
--- результат: y2000_2024 - 34 076, y1990_2024 - 39 087,  y2000_2026 - 36 153, all_years - 53 377
+-- результат: y2000_2024 - 34 076, y1990_2024 - 39 087, y2000_2026 - 36 153, all_years - 53 377
 
 SELECT
     count(*) FILTER (WHERE EXTRACT(YEAR FROM release_date) BETWEEN 2000 AND 2024) AS y2000_2024,
@@ -91,3 +91,39 @@ WHERE status = 'Released'
   AND runtime >= 60
   AND imdb_rating IS NOT NULL
   AND imdb_votes >= 1000;
+
+-- запросы ниже требуют готового представления: сначала выполнить 03_views.sql
+
+-- Распределение roi в v_roi_movies: ищем абсурдные значения
+-- результат: min 0.00002, медиана 1.56, 95% 10.4, 99% 31.0, max 12 890
+SELECT
+    min(roi), max(roi),
+    percentile_cont(ARRAY[0.01, 0.05, 0.5, 0.95, 0.99]) WITHIN GROUP (ORDER BY roi) AS roi_q
+FROM v_roi_movies;
+
+-- Крайние значения roi: 15 худших и 10 лучших
+-- результат: у 15 худших сборы от 1 008 до 8 972 при бюджетах 4,5-65 млн (похоже на неполные данные);
+-- среди лучших и малобюджетные хиты (Paranormal Activity), и подозрительные бюджеты
+(SELECT title, release_date, budget, revenue, roi
+ FROM v_roi_movies ORDER BY roi ASC LIMIT 15)
+UNION ALL
+(SELECT title, release_date, budget, revenue, roi
+ FROM v_roi_movies ORDER BY roi DESC LIMIT 10);
+
+-- Сколько фильмов отсекут разные пороги нижнего хвоста
+-- результат: 60 / 337 / 188 / 475 / 252
+-- решение: порог revenue >= 1000 оставлен; в этапе 4 проверяю устойчивость выводов
+-- без 252 фильмов (бюджет от 1 млн и сборы < 100 тысяч)
+SELECT
+    count(*) FILTER (WHERE revenue < 10000) AS rev_lt_10k,
+    count(*) FILTER (WHERE revenue < 100000) AS rev_lt_100k,
+    count(*) FILTER (WHERE roi < 0.01) AS roi_lt_001,
+    count(*) FILTER (WHERE roi < 0.05) AS roi_lt_005,
+    count(*) FILTER (WHERE budget >= 1000000 AND revenue < 100000) AS big_budget_tiny_rev
+FROM v_roi_movies;
+
+-- Сколько фильмов в v_roi_movies по возрастным рейтингам (для гипотезы 2)
+-- результат: R 2 235, NULL 1 929, PG-13 1 774, PG 706, NR 235, G 111, NC-17 14 (сумма 7 004)
+-- для гипотезы 2 остаётся 4 009 фильмов (R + PG-13)
+SELECT certification_us, count(*) FROM v_roi_movies
+GROUP BY certification_us ORDER BY 2 DESC;
