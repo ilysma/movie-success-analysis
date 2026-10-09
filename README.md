@@ -23,7 +23,7 @@ python -c "import kagglehub; print(kagglehub.dataset_download('alanvourch/tmdb-m
 
 ### Колонки
 
-`id`, `title`, `vote_average`, `vote_count`, `status`, `release_date`, `revenue`, `runtime`, `budget`, `imdb_id`, `original_language`, `original_title`, `overview`, `popularity`, `tagline`, `genres`, `production_companies`, `production_countries`, `spoken_languages`, `cast`, `director`, `director_of_photography`, `writers`, `producers`, `music_composer`, `imdb_rating`, `imdb_votes`, `poster_path`, `keywords`, `certification_us`
+`id`, `title`, `vote_average`, `vote_count`, `status`, `release_date`, `revenue`, `runtime`, `budget`, `imdb_id`, `original_language`, `original_title`, `overview`, `popularity`, `tagline`, `genres`, `production_companies`, `production_countries`, `spoken_languages`, `cast`, `director`, `director_of_photography`, `writers`, `producers`, `music_composer`, `imdb_rating`, `imdb_votes`, `poster_path`,`keywords`, `certification_us`
 
 ### Особенности данных
 
